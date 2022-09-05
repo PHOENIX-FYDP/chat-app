@@ -1,8 +1,7 @@
 const jwt = require("jsonwebtoken");
-
+const JWT_SECRET_KEY = process.env.JWT_SECRET_KEY;
 const generateToken = (id) => {
-  const JWT_SECRET = "i hate potatoes";
-  return jwt.sign({ id }, JWT_SECRET, { expiresIn: "30d" });
+  return jwt.sign({ id }, JWT_SECRET_KEY, { expiresIn: "30d" });
 };
 
 module.exports = generateToken;

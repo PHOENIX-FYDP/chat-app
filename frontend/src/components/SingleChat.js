@@ -17,7 +17,9 @@ import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import ScrollableChat from "./ScrollableChat";
 import "./styles.css";
 import io from "socket.io-client";
-const ENDPOINT = "https://chatly-mern-app.herokuapp.com/  ";
+const ENDPOINT = "https://chatlay-mern-app.herokuapp.com/  ";
+
+// const ENDPOINT = "http://localhost:5000/";
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {

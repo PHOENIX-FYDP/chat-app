@@ -9,7 +9,7 @@ const { notFound, errorHandler } = require("./middlewares/errorMiddleware");
 const path = require("path");
 
 dotenv.config();
-console.log(process.env.PORT, "env port");
+
 connectDB();
 const app = express();
 app.use(express.json());
@@ -21,9 +21,8 @@ app.use("/api/message", messageRoutes);
 //---------------------------------------
 
 const __dirname1 = path.resolve();
-const a = "production";
-
-if (a === "production") {
+console.log(process.env.NODE_ENV, "process.env.NODE_ENV");
+if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.join(__dirname1, "/frontend/build")));
 
   app.get("*", (req, res) =>
@@ -42,8 +41,8 @@ app.use(errorHandler);
 
 const PORT = process.env.PORT || 5000;
 
-// console.log(process.env.PORT, "env port");
-const server = app.listen(5000, console.log(`Server started on port ${PORT}`));
+console.log(process.env.PORT, "env port");
+const server = app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
