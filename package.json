@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "",
   "main": "server.js",
+  "engines": {
+    "node": "16.14.0"
+  },
   "scripts": {
     "start": "nodemon backend/server.js",
     "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm insall --prefix frontend && npm run build --prefix frontend"
