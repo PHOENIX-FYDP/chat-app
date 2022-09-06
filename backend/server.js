@@ -39,18 +39,15 @@ if (process.env.NODE_ENV === "production") {
 app.use(notFound);
 app.use(errorHandler);
 
-// const PORT = process.env.PORT || 5000;
-const PORT = "https://chatlay-mern-app.herokuapp.com/  ";
+const PORT = process.env.PORT || 5000;
+
 console.log(process.env.PORT, "env port");
 const server = app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
 const io = require("socket.io")(server, {
   pingTimeout: 60000,
   cors: {
-    origin:
-      "http://localhost:3000" ||
-      "http://localhost:5000" ||
-      "https://chatlay-mern-app.herokuapp.com/  ",
+    origin: "http://localhost:3000",
     // credentials: true,
   },
 });
