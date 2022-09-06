@@ -39,8 +39,8 @@ if (process.env.NODE_ENV === "production") {
 app.use(notFound);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 5000;
-
+// const PORT = process.env.PORT || 5000;
+const PORT = "https://chatlay-mern-app.herokuapp.com/  ";
 console.log(process.env.PORT, "env port");
 const server = app.listen(PORT, console.log(`Server started on port ${PORT}`));
 
