@@ -18,15 +18,13 @@ import ScrollableChat from "./ScrollableChat";
 import "./styles.css";
 import io from "socket.io-client";
 const ENDPOINT = "https://chatlay-mern-app.herokuapp.com/  ";
+// const ENDPOINT = "http://localhost:5000/";
 
-// const ENDPOINT =
-//   "http://localhost:5000/" ||
-//   "https://chatlay-mern-app.herokuapp.com/  " ||
-//   "http://localhost:3000/";
 var socket, selectedChatCompare;
 
 const SingleChat = ({ fetchAgain, setFetchAgain }) => {
-  const { user, selectedChat, setSelectedChat } = ChatState();
+  const { selectedChat, setSelectedChat, user, notification, setNotification } =
+    ChatState();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [newMessage, setNewMessage] = useState("");
@@ -138,12 +136,18 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
     selectedChatCompare = selectedChat;
   }, [selectedChat]);
 
+  // console.log(notification, "-------");
+
   useEffect(() => {
     socket.on("message recieved", (newMessageRecieved) => {
       if (
         !selectedChatCompare || // if chat is not selected or doesn't match current chat
         selectedChatCompare._id !== newMessageRecieved.chat._id
       ) {
+        if (!notification.includes(newMessageRecieved)) {
+          setNotification([newMessageRecieved, ...notification]);
+          setFetchAgain(!fetchAgain);
+        }
       } else {
         setMessages([...messages, newMessageRecieved]);
       }
