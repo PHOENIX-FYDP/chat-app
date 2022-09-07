@@ -48,13 +48,14 @@ const io = require("socket.io")(server, {
   pingTimeout: 1000000,
   cors: {
     origin: "http://localhost:3000",
+
     // credentials: true,
   },
 });
 
-io.on("connection", (socket) => {
+io.on("connection", async (socket) => {
   console.log("Connected to socket.io");
-  socket.on("setup", (userData) => {
+  await socket.on("setup", (userData) => {
     socket.join(userData._id);
     socket.emit("connected");
   });
