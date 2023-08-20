@@ -12,13 +12,15 @@ import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { getSender, getSenderFull } from "../config/ChatLogics";
 import { ChatState } from "../Context/ChatProvider";
+import { JSEncrypt } from "jsencrypt";
 import ProfileModal from "./miscellaneous/ProfileModal";
 import UpdateGroupChatModal from "./miscellaneous/UpdateGroupChatModal";
 import ScrollableChat from "./ScrollableChat";
 import "./styles.css";
 import io from "socket.io-client";
-const ENDPOINT = "https://chatlay-mern-app.herokuapp.com";
-// const ENDPOINT = "http://localhost:5000/";
+// /const ENDPOINT = "https://chatlay-mern-app.herokuapp.com";
+const ENDPOINT = "http://localhost:5000/";
+
 
 var socket, selectedChatCompare;
 
@@ -34,6 +36,26 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   const toast = useToast();
 
   const fetchMessages = async () => {
+    // console.log(selectedChat.users[1]?.publicKey, "selectedChat")
+    var privateKey = `
+    -----BEGIN RSA PRIVATE KEY-----
+    MIICXQIBAAKBgQDlOJu6TyygqxfWT7eLtGDwajtNFOb9I5XRb6khyfD1Yt3YiCgQ
+    WMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76xFxdU6jE0NQ+Z+zEdhUTooNR
+    aY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB
+    AoGAfY9LpnuWK5Bs50UVep5c93SJdUi82u7yMx4iHFMc/Z2hfenfYEzu+57fI4fv
+    xTQ//5DbzRR/XKb8ulNv6+CHyPF31xk7YOBfkGI8qjLoq06V+FyBfDSwL8KbLyeH
+    m7KUZnLNQbk8yGLzB3iYKkRHlmUanQGaNMIJziWOkN+N9dECQQD0ONYRNZeuM8zd
+    8XJTSdcIX4a3gy3GGCJxOzv16XHxD03GW6UNLmfPwenKu+cdrQeaqEixrCejXdAF
+    z/7+BSMpAkEA8EaSOeP5Xr3ZrbiKzi6TGMwHMvC7HdJxaBJbVRfApFrE0/mPwmP5
+    rN7QwjrMY+0+AbXcm8mRQyQ1+IGEembsdwJBAN6az8Rv7QnD/YBvi52POIlRSSIM
+    V7SwWvSK4WSMnGb1ZBbhgdg57DXaspcwHsFV7hByQ5BvMtIduHcT14ECfcECQATe
+    aTgjFnqE/lQ22Rk0eGaYO80cc643BXVGafNfd9fcvwBMnk0iGX0XRsOozVt5Azil
+    psLBYuApa66NcVHJpCECQQDTjI2AQhFc1yRnCU/YgDnSpJVm1nASoRUnU8Jfm3Oz
+    uku7JUXcVpt08DFSceCEX9unCuMcT72rAQlLpdZir876
+    -----END RSA PRIVATE KEY-----`
+
+    // var privateKey = localStorage.getItem("privateKey")
+    // console.log(privateKey, "privateKey")
     if (!selectedChat) return;
 
     try {
@@ -49,8 +71,22 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
         `/api/message/${selectedChat._id}`,
         config
       );
-      console.log(data);
-      setMessages(data);
+
+      const { data: data1 } = await axios.get(`/api/message/${selectedChat._id}`, config);
+      let variable1 = data;
+
+
+      console.log(data1, "db getting data")
+
+
+      var decrypt = new JSEncrypt();
+      decrypt.setPrivateKey(privateKey);
+      for (let i = 0; i < variable1.length; i++) {
+        const encryptedContentBuffer = variable1[i].content
+        variable1[i].content = decrypt.decrypt(encryptedContentBuffer);
+
+      }
+      setMessages(variable1);
       setLoading(false);
 
       socket.emit("join chat", selectedChat._id);
@@ -67,7 +103,56 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
   };
 
   const sendMessage = async (event) => {
+    //-------------------------------------------------
+    var encrypt = new JSEncrypt();
+
+    var publicKey = `
+    -----BEGIN PUBLIC KEY-----
+    MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDlOJu6TyygqxfWT7eLtGDwajtN
+    FOb9I5XRb6khyfD1Yt3YiCgQWMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76
+    xFxdU6jE0NQ+Z+zEdhUTooNRaY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4
+    gwQco1KRMDSmXSMkDwIDAQAB
+    -----END PUBLIC KEY-----`;
+
+    // Copied from https://github.com/travist/jsencrypt
+    var privateKey = `
+    -----BEGIN RSA PRIVATE KEY-----
+    MIICXQIBAAKBgQDlOJu6TyygqxfWT7eLtGDwajtNFOb9I5XRb6khyfD1Yt3YiCgQ
+    WMNW649887VGJiGr/L5i2osbl8C9+WJTeucF+S76xFxdU6jE0NQ+Z+zEdhUTooNR
+    aY5nZiu5PgDB0ED/ZKBUSLKL7eibMxZtMlUDHjm4gwQco1KRMDSmXSMkDwIDAQAB
+    AoGAfY9LpnuWK5Bs50UVep5c93SJdUi82u7yMx4iHFMc/Z2hfenfYEzu+57fI4fv
+    xTQ//5DbzRR/XKb8ulNv6+CHyPF31xk7YOBfkGI8qjLoq06V+FyBfDSwL8KbLyeH
+    m7KUZnLNQbk8yGLzB3iYKkRHlmUanQGaNMIJziWOkN+N9dECQQD0ONYRNZeuM8zd
+    8XJTSdcIX4a3gy3GGCJxOzv16XHxD03GW6UNLmfPwenKu+cdrQeaqEixrCejXdAF
+    z/7+BSMpAkEA8EaSOeP5Xr3ZrbiKzi6TGMwHMvC7HdJxaBJbVRfApFrE0/mPwmP5
+    rN7QwjrMY+0+AbXcm8mRQyQ1+IGEembsdwJBAN6az8Rv7QnD/YBvi52POIlRSSIM
+    V7SwWvSK4WSMnGb1ZBbhgdg57DXaspcwHsFV7hByQ5BvMtIduHcT14ECfcECQATe
+    aTgjFnqE/lQ22Rk0eGaYO80cc643BXVGafNfd9fcvwBMnk0iGX0XRsOozVt5Azil
+    psLBYuApa66NcVHJpCECQQDTjI2AQhFc1yRnCU/YgDnSpJVm1nASoRUnU8Jfm3Oz
+    uku7JUXcVpt08DFSceCEX9unCuMcT72rAQlLpdZir876
+    -----END RSA PRIVATE KEY-----`
+    // const userInfo = JSON.parse(localStorage.getItem("userinfo"));
+    // var publicKey;
+    // var name;
+    // for (let i = 0; i < selectedChat.users.length; i++) {
+    //   if (userInfo._id !== selectedChat.users[i]._id) {
+    //     publicKey = selectedChat.users[i]?.publicKey
+    //     name = selectedChat.users[i]?.name
+    //   }
+    // }
+
+
+    // var privateKey = localStorage.getItem("privateKey")
+    // console.log(name, "name")
+    // console.log(publicKey, "pbkey")
+
+    // let showMessage
+
+    encrypt.setPublicKey(publicKey);
     if (event.key === "Enter" && newMessage) {
+
+      var encrypted = encrypt.encrypt(newMessage);
+      console.log(encrypted, "encrypted")
       socket.emit("stop typing", selectedChat._id);
       try {
         const config = {
@@ -77,15 +162,21 @@ const SingleChat = ({ fetchAgain, setFetchAgain }) => {
           },
         };
         setNewMessage("");
-        const { data } = await axios.post(
+        // console.log(data, "before sending")
+        let { data } = await axios.post(
           "/api/message",
           {
-            content: newMessage,
+            content: encrypted,
             chatId: selectedChat,
           },
           config
         );
-        console.log(data);
+        let showdata = data
+        console.log(showdata, "backend store data after sending ");
+        var decrypt = new JSEncrypt();
+        decrypt.setPrivateKey(privateKey);
+        data.content = decrypt.decrypt(data.content);
+
 
         socket.emit("new message", data);
         setMessages([...messages, data]);

@@ -3,7 +3,9 @@ const expressAsyncHandler = require("express-async-handler");
 const User = require("../models/userModel");
 
 const registerUser = expressAsyncHandler(async (req, res) => {
-  const { name, email, password, pic } = req.body;
+  const { name, email, password, pic, publicKey } = req.body;
+
+
 
   if (!name || !email || !password) {
     res.status(400);
@@ -22,8 +24,9 @@ const registerUser = expressAsyncHandler(async (req, res) => {
     email,
     password,
     pic,
+    publicKey
   });
-
+  console.log(user, "user")
   if (user) {
     res.status(201).json({
       _id: user._id,
@@ -60,11 +63,11 @@ const authUser = expressAsyncHandler(async (req, res) => {
 const allUsers = expressAsyncHandler(async (req, res) => {
   const keyword = req.query.search
     ? {
-        $or: [
-          { name: { $regex: req.query.search, $options: "i" } },
-          { email: { $regex: req.query.search, $options: "i" } },
-        ],
-      }
+      $or: [
+        { name: { $regex: req.query.search, $options: "i" } },
+        { email: { $regex: req.query.search, $options: "i" } },
+      ],
+    }
     : {};
 
   const users = await User.find(keyword).find({ _id: { $ne: req.user._id } });

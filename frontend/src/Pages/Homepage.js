@@ -57,6 +57,7 @@ const Homepage = () => {
             text-align="center"
             display="block"
             justify-content="center"
+            height={"100px"}
             align-items="center"
             src={Img}
           />

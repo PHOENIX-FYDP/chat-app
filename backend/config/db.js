@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const dotenv = require("dotenv");
 
 dotenv.config();
-
+const password = encodeURIComponent("f@izy2023")
 // const MONGO_URI = process.env.MONGO_URI;
 // console.log(MONGO_URI);
 

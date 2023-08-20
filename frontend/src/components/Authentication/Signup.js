@@ -13,6 +13,7 @@ import {
 } from "@chakra-ui/react";
 import axios from "axios";
 import { useHistory } from "react-router-dom";
+import forge from 'node-forge';
 
 const Signup = () => {
   const [name, setName] = useState();
@@ -25,8 +26,10 @@ const Signup = () => {
   const toast = useToast();
   const handleClick = () => setShow(!show);
   const ahistory = useHistory();
-
+  const [publicKey, setPublicKey] = useState('');
+  const [privateKey, setPrivateKey] = useState('');
   const postDetails = (pics) => {
+
     setLoading(true);
     if (pics === undefined) {
       toast({
@@ -71,8 +74,18 @@ const Signup = () => {
   };
 
   const submitHandler = async () => {
+
+
+    const rsaKeyPair = forge.pki.rsa.generateKeyPair({ bits: 2048 });
+    const publicKeyPem = forge.pki.publicKeyToPem(rsaKeyPair.publicKey);
+    const privateKeyPem = forge.pki.privateKeyToPem(rsaKeyPair.privateKey);
+
+    setPublicKey(publicKeyPem);
+    setPrivateKey(privateKeyPem);
+    localStorage.setItem('privateKey', privateKeyPem);
+
     setLoading(true);
-    if (!name || !email || !password || !confirmpassword) {
+    if (!name || !email || !password || !confirmpassword || !publicKey || !privateKey) {
       toast({
         title: "Please Enter All Fields",
         status: "warning",
@@ -101,7 +114,7 @@ const Signup = () => {
       };
       const { data } = await axios.post(
         "api/user",
-        { name, email, password, pic },
+        { name, email, password, pic, publicKey },
         config
       );
       toast({
@@ -112,6 +125,7 @@ const Signup = () => {
         position: "bottom",
       });
       localStorage.setItem("userinfo", JSON.stringify(data));
+      console.log(data, "ddd")
       setLoading(false);
       ahistory.push("/chats");
     } catch (err) {
@@ -192,7 +206,7 @@ const Signup = () => {
         width="100%"
         style={{ marginTop: 15 }}
         onClick={submitHandler}
-        // isLoading={loading}
+      // isLoading={loading}
       >
         Sign Up
       </Button>
